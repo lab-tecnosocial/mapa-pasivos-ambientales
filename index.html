@@ -31,12 +31,14 @@
 <body>
     <div id="map"></div>
     <script>
+
         var map = L.map('map', {
             dragging: !L.Browser.mobile,
             scrollWheelZoom: false,
         }).setView([-16.55, -66.3810], 7);
         L.tileLayer('https://api.mapbox.com/styles/v1/labtecnosocial/clwku9msj00br01p6g08s1j3l/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibGFidGVjbm9zb2NpYWwiLCJhIjoiY2x5NG03cGUyMDNubDJpcHV6NjZzYWRrZCJ9.nVFNm135XzTFpDohNRv-7Q', {
             maxZoom: 19,
+            attributionControl: false
         }).addTo(map);
 
         var rios = L.geoJSON.ajax("data/rios.geojson", {
@@ -133,6 +135,8 @@
         rios.addTo(map);
         minas.addTo(map);
         localidades.addTo(map);
+
+        map.attributionControl.addAttribution('Desarrollado por el <a href="https://labtecnosocial.org/">Lab TecnoSocial</a>');
 
         // Add layer controls
 
