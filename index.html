@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet-ajax/dist/leaflet.ajax.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.panellayers/dist/leaflet.panellayers.css" />
+    <script src="https://unpkg.com/leaflet.panellayers"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+        }
+
+        #map {
+            height: 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="map"></div>
+    <script>
+        var map = L.map('map', {
+            dragging: !L.Browser.mobile,
+            scrollWheelZoom: false,
+        }).setView([-16.55, -66.3810], 7);
+        L.tileLayer('https://api.mapbox.com/styles/v1/labtecnosocial/clwku9msj00br01p6g08s1j3l/tiles/256/{z}/{x}/{y}?access_token=pk.eyJ1IjoibGFidGVjbm9zb2NpYWwiLCJhIjoiY2x5NG03cGUyMDNubDJpcHV6NjZzYWRrZCJ9.nVFNm135XzTFpDohNRv-7Q', {
+            maxZoom: 19,
+        }).addTo(map);
+
+        var rios = L.geoJSON.ajax("data/rios.geojson", {
+            onEachFeature: function (feature, layer) {
+                let nombre = feature.properties['NOMBRE'] ? feature.properties['NOMBRE'] : '';
+
+                layer.bindPopup(`
+                    <b>${nombre}</b><br>
+                    Tipo: ${feature.properties['CATEG_DES']}<br>
+                `);
+            },
+            style: function () {
+                return {
+                    weight: 0.8
+                };
+            }
+        });
+
+        var minas = L.geoJSON.ajax("data/minas.geojson", {
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup(`
+                    <b>${feature.properties['MINA']}</b><br>
+                    Departamento: ${feature.properties['DEPARTAMEN']}<br>
+                    Municipio: ${feature.properties['MUNICIPIO']}<br>
+                    Tipo de pasivo: ${feature.properties['TIPO_DE_PA']}
+                `);
+            },
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                    radius: 2,
+                    fillColor: "red",
+                    color: "#000",
+                    fillOpacity: 0.8,
+                    stroke: false
+
+                });
+            }
+        });
+
+
+        var localidades = L.geoJSON.ajax("data/localidades.geojson", {
+            onEachFeature: function (feature, layer) {
+                layer.bindPopup(`
+                    <b>${feature.properties['nombre_c_2']}</b><br>
+                    Departamento: ${feature.properties['nombre_dep']}<br>
+                    Población: ${feature.properties['poblacion_']}<br>
+                    Viviendas: ${feature.properties['viviendas_']}<br>
+                
+                `);
+            },
+            pointToLayer: function (feature, latlng) {
+                return L.circleMarker(latlng, {
+                    radius: 2,
+                    fillColor: "green",
+                    color: "#000",
+                    fillOpacity: 0.8,
+                    stroke: false
+                });
+            }
+        });
+
+
+
+        // var buffer1km = L.geoJSON.ajax("data/buffer-1km.geojson", {
+        //     onEachFeature: function (feature, layer) {
+        //         layer.bindPopup('Buffer 1km');
+        //     },
+        //     style: function () {
+        //         return {
+        //             color: "brown",
+        //             fillOpacity: 0.1
+        //         };
+        //     }
+        // });
+
+
+
+        // var areasProtegidas = L.geoJSON.ajax("data/areas-protegidas.geojson", {
+        //     onEachFeature: function (feature, layer) {
+        //         layer.bindPopup(`
+        //         <<b>${feature.properties['NOMBRE_AP_']}</b><br>
+        //         Categoria: ${feature.properties['CATEGORIA']}<br>
+        //         `);
+        //     },
+        //     style: function () {
+        //         return {
+        //             color: "green",
+        //             fillOpacity: 0.5
+        //         };
+        //     }
+        // });
+
+        // Add layers to the map
+        rios.addTo(map);
+        minas.addTo(map);
+        localidades.addTo(map);
+
+        // Add layer controls
+
+        var overlayMaps = {
+            "🟦 Rios expuestos": rios,
+            "🟩  Comunidades expuestas": localidades,
+            "🟥 Pasivos ambientales": minas,
+            // "🟫 Afectación": buffer1km,
+            // "🟩 Areas Protegidas": areasProtegidas,
+        };
+
+        L.control.layers(null, overlayMaps, {
+            collapsed: false,
+            position: 'bottomright'
+        }).addTo(map);
+
+    </script>
+</body>
+
+</html>
